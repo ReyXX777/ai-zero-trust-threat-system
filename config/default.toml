@@ -1,0 +1,15 @@
+# default.toml
+
+# Database configuration
+database_url = "postgres://user:password@localhost:5432/zero_trust_db"
+
+# Kafka configuration
+kafka_brokers = "localhost:9092"
+
+# API server configuration
+api_port = 8080
+
+# Logging configuration
+log_level = "info"
+
+# Additional settings can go here as needed
