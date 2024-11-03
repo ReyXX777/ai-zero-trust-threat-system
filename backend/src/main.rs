@@ -38,7 +38,7 @@ async fn main() -> std::io::Result<()> {
             // Initialize API routes
             .configure(api::init_routes)
     })
-    .bind("0.0.0.0:8080")?
+    .bind("0.0.0.0:8080")? // Listen on all interfaces on port 8080
     .run()
     .await
 }
