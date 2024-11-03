@@ -1,5 +1,6 @@
 // ai/behavioral_model.rs
 use tch::{nn, nn::Module, Device, Tensor};
+use tokio; // Import tokio runtime
 
 pub async fn run_analysis() -> String {
     // Create a variable store for model parameters on the CPU
@@ -18,10 +19,20 @@ pub async fn run_analysis() -> String {
 
     // Forward pass through the network
     let output = model.forward(&input);
-    
+
+    // Convert the output tensor to a scalar
+    let output_value = output.double_value(&[0]);
+
     // Format and return the output as a JSON string for better readability
     format!(
         "{{\"Behavioral analysis result\": {:.3}}}",
-        f32::from(output)
+        output_value
     )
+}
+
+// Example function to call run_analysis and print the result
+#[tokio::main]
+async fn main() {
+    let result = run_analysis().await;
+    println!("{}", result);
 }
