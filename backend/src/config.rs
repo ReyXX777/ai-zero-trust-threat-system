@@ -11,6 +11,7 @@ pub struct Settings {
 }
 
 impl Settings {
+    /// Creates a new instance of Settings by loading the configuration.
     pub fn new() -> Result<Self, ConfigError> {
         // Initialize the configuration reader
         let mut cfg = Config::new();
