@@ -1,31 +1,24 @@
 <script>
     import { onMount } from 'svelte';
 
-    // State variables
     let inputData = '';
     let result = '';
     let loading = false;
 
-    // Function to call the backend API for threat analysis
     async function analyzeThreat() {
         loading = true;
-        result = '';  // Clear previous results
+        result = '';
 
         try {
             const response = await fetch('http://localhost:8080/api/analyze', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ data: inputData }),
             });
 
-            if (response.ok) {
-                const responseData = await response.json();
-                result = JSON.stringify(responseData, null, 2);
-            } else {
-                result = 'Error: Unable to process threat analysis.';
-            }
+            result = response.ok 
+                ? JSON.stringify(await response.json(), null, 2) 
+                : 'Error: Unable to process threat analysis.';
         } catch (error) {
             result = `Error: ${error.message}`;
         } finally {
@@ -36,7 +29,6 @@
 
 <main>
     <h1>AI-Driven Zero Trust Threat Analysis</h1>
-
     <div class="input-section">
         <label for="inputData">Enter Threat Data (JSON format):</label>
         <textarea
@@ -48,7 +40,6 @@
             {loading ? 'Analyzing...' : 'Analyze Threat'}
         </button>
     </div>
-
     <div class="result-section">
         <h2>Analysis Result</h2>
         <pre>{result || 'No results yet. Enter data and click "Analyze Threat".'}</pre>
