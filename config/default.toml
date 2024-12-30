@@ -12,4 +12,25 @@ api_port = 8080
 # Logging configuration
 log_level = "info"
 
-# Additional settings can go here as needed
+# Optional: Additional settings for security, performance, etc.
+# Example: Enabling debug mode in development or a specific feature
+debug_mode = false
+
+# Optional: Timeout settings for the database connection
+db_connection_timeout = 30  # seconds
+
+# Optional: Kafka topic for threat detection messages
+kafka_topic = "threat_detection"
+
+# Optional: Feature flags for enabling/disabling certain features
+enable_advanced_security = true
+
+# Optional: Additional logging settings (e.g., log rotation)
+log_rotation = true
+log_max_size = "100MB"  # Size of the log file before rotation
+
+# Optional: API Rate Limiting settings
+api_rate_limit = 1000  # Max number of requests per minute
+
+# Optional: External API keys or third-party service credentials (make sure not to expose in public repos)
+# api_key = "your-api-key-here"
