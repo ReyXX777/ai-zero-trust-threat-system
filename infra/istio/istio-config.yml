@@ -1,0 +1,101 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-gateway
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway  # Use the Istio ingress gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ai-zero-trust-virtual-service
+  namespace: default
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - istio-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/api"
+      route:
+        - destination:
+            host: ai-zero-trust-service  # Name of your backend service (e.g., API server)
+            port:
+              number: 8080  # Ensure this matches your service port
+    - match:
+        - uri:
+            prefix: "/dashboard"
+      route:
+        - destination:
+            host: ai-zero-trust-dashboard  # Name of your frontend service (e.g., React or Svelte app)
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: ai-zero-trust-default  # Catch-all route for other traffic
+            port:
+              number: 80
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: PeerAuthentication
+metadata:
+  name: ai-zero-trust-peer-authentication
+  namespace: default
+spec:
+  mtls:
+    mode: STRICT  # Enforce mutual TLS for all services within the mesh
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: AuthorizationPolicy
+metadata:
+  name: ai-zero-trust-authorization-policy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: ai-zero-trust-app  # Replace with the label of your app/service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/default/sa/ai-zero-trust-service-account"  # Example service account
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/api/*"]  # Secure API routes with the authorization policy
+  provider:
+    name: istio-authz
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: ai-zero-trust-destination-rule
+  namespace: default
+spec:
+  host: ai-zero-trust-service  # Name of your service (backend)
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL  # Use Istio mutual TLS for secure communication between services
