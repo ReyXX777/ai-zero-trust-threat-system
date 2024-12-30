@@ -15,30 +15,30 @@ export default {
   input: 'src/index.js', // Entry point of your application
   output: {
     file: 'dist/bundle.js',
-    format: 'iife', // Immediately Invoked Function Expression suitable for <script> tags
-    name: 'MyApp', // Name of the global variable that will hold the app
-    sourcemap: true, // Generate sourcemaps
+    format: 'iife', // Immediately Invoked Function Expression for inclusion in HTML <script>
+    name: 'MyApp', // Global variable name for your app
+    sourcemap: true, // Generate source maps for easier debugging
   },
   plugins: [
-    resolve(), // Resolve node_modules
-    commonjs(), // Convert CommonJS modules to ES6
+    resolve(), // Resolves node_modules for external dependencies
+    commonjs(), // Converts CommonJS modules to ES6 for bundling
     babel({
-      babelHelpers: 'bundled',
-      exclude: 'node_modules/**', // Only transpile our source code
-      presets: ['@babel/preset-env', '@babel/preset-react'],
+      babelHelpers: 'bundled', // Use bundled Babel helpers for compatibility
+      exclude: 'node_modules/**', // Only transpile source code, not node_modules
+      presets: ['@babel/preset-env', '@babel/preset-react'], // JSX & ES6 transpiling
     }),
-    postcss(), // Process CSS files
-    json(), // Allow importing JSON files
-    image(), // Import image files
-    production && terser(), // Minify the code in production
+    postcss(), // Processes CSS files (you may want to configure plugins like autoprefixer)
+    json(), // Allows importing JSON files directly
+    image(), // Allows importing image files
+    production && terser(), // Minifies the code in production builds
     !production && serve({
       open: true,
-      contentBase: 'dist', // Serve from the 'dist' directory
+      contentBase: 'dist', // Serve the 'dist' folder
       port: 3000, // Serve on port 3000
     }),
-    !production && livereload('dist'), // Live reload in development
+    !production && livereload('dist'), // Enables live reloading in development mode
   ],
   watch: {
-    clearScreen: false,
+    clearScreen: false, // Prevents clearing the console when watching for changes
   },
 };
