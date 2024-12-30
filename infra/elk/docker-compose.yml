@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  # Elasticsearch: Stores and indexes log data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS="-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"  # Expose port 9200 for interacting with Elasticsearch
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - elk
+
+  # Logstash: Collects, processes, and forwards logs
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.10.0
+    container_name: logstash
+    environment:
+      - LS_JAVA_OPTS="-Xms512m -Xmx512m"
+    ports:
+      - "5044:5044"  # Expose port for Logstash input (Filebeat, etc.)
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf  # Configuration file for Logstash
+    networks:
+      - elk
+
+  # Kibana: Web interface for interacting with the data
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.0
+    container_name: kibana
+    environment:
+      - SERVER_NAME=kibana
+    ports:
+      - "5601:5601"  # Expose port 5601 for Kibana dashboard
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch  # Ensure Elasticsearch is up before Kibana
+
+volumes:
+  elasticsearch_data:  # Persistent volume for Elasticsearch data
+
+networks:
+  elk:
+    driver: bridge
