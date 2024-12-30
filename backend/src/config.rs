@@ -1,6 +1,7 @@
 // config.rs
 use config::{Config, ConfigError, File, Environment};
 use serde::Deserialize;
+use std::env;
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -16,18 +17,21 @@ impl Settings {
         // Initialize the configuration reader
         let mut cfg = Config::new();
 
-        // Load the default configuration file
+        // Load the default configuration file (config/default.toml)
         cfg.merge(File::with_name("config/default"))?;
 
-        // Optionally override with an environment-specific configuration
-        if let Ok(env) = std::env::var("RUN_MODE") {
+        // Optionally, load an environment-specific configuration file if RUN_MODE is set
+        if let Ok(env) = env::var("RUN_MODE") {
+            // Load the environment-specific config (e.g., config/dev.toml)
             cfg.merge(File::with_name(&format!("config/{}", env)).required(false))?;
         }
 
-        // Override with environment variables prefixed with "APP_" if set
+        // Optionally, override with environment variables prefixed with "APP_"
+        // (e.g., APP_DATABASE_URL, APP_KAFKA_BROKERS, etc.)
         cfg.merge(Environment::with_prefix("APP").separator("_"))?;
 
         // Deserialize into the Settings struct
         cfg.try_into()
     }
 }
+
