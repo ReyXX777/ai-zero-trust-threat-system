@@ -5,9 +5,10 @@
     let result = '';
     let loading = false;
 
+    // Function to analyze the threat
     async function analyzeThreat() {
         loading = true;
-        result = '';
+        result = '';  // Reset result
 
         try {
             const response = await fetch('http://localhost:8080/api/analyze', {
@@ -16,9 +17,13 @@
                 body: JSON.stringify({ data: inputData }),
             });
 
-            result = response.ok 
-                ? JSON.stringify(await response.json(), null, 2) 
-                : 'Error: Unable to process threat analysis.';
+            // Check if the response is OK (status 200)
+            if (response.ok) {
+                const jsonData = await response.json();
+                result = JSON.stringify(jsonData, null, 2);  // Format the JSON nicely
+            } else {
+                result = `Error: ${response.statusText || 'Unable to process threat analysis.'}`;
+            }
         } catch (error) {
             result = `Error: ${error.message}`;
         } finally {
@@ -29,17 +34,20 @@
 
 <main>
     <h1>AI-Driven Zero Trust Threat Analysis</h1>
+    
     <div class="input-section">
         <label for="inputData">Enter Threat Data (JSON format):</label>
         <textarea
             id="inputData"
             bind:value={inputData}
             placeholder='{"type": "malware", "severity": "high"}'
+            disabled={loading}  <!-- Disable input when analyzing -->
         ></textarea>
-        <button on:click={analyzeThreat} disabled={loading}>
+        <button on:click={analyzeThreat} disabled={loading || !inputData}>
             {loading ? 'Analyzing...' : 'Analyze Threat'}
         </button>
     </div>
+
     <div class="result-section">
         <h2>Analysis Result</h2>
         <pre>{result || 'No results yet. Enter data and click "Analyze Threat".'}</pre>
@@ -70,6 +78,9 @@
         height: 150px;
         padding: 0.5rem;
         font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        resize: vertical;
     }
 
     button {
@@ -84,6 +95,7 @@
 
     button:disabled {
         background-color: #aaa;
+        cursor: not-allowed;
     }
 
     .result-section {
@@ -91,11 +103,13 @@
         background-color: #f9f9f9;
         padding: 1rem;
         border-radius: 4px;
+        border: 1px solid #ddd;
     }
 
     pre {
         font-size: 0.9rem;
         color: #333;
         white-space: pre-wrap;
+        word-wrap: break-word;
     }
 </style>
