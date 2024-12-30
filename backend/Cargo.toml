@@ -4,10 +4,30 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# Web framework for building the HTTP server
 actix-web = "4.0"
+
+# For serializing and deserializing data (JSON)
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# Deep learning library for AI-related tasks
 tch = "0.5.0"
+
+# Polars is used for data analysis (if you are working with data frames)
 polars = "0.20.0"
+
+# Logging library
 log = "0.4"
+
+# Configuration handling
 config = "0.11"
+
+# Tokio is required for async runtime (Actix Web uses it)
+tokio = { version = "1", features = ["full"] }
+
+# env_logger is an implementation of the `log` crate for logging
+env_logger = "0.9"
+
+# Optional: for additional features such as machine learning support in Polars
+ndarray = "0.15"
