@@ -5,18 +5,29 @@
     let threatAnalysisResult = '';
     let isLoading = false;
 
+    // Function to analyze the threat
     async function analyzeThreat() {
+        if (!threatInput.trim()) {
+            threatAnalysisResult = 'Error: Please provide valid threat data in JSON format.';
+            return;
+        }
+
         isLoading = true;
-        threatAnalysisResult = '';
+        threatAnalysisResult = '';  // Reset result
+
         try {
             const response = await fetch('http://localhost:8080/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ data: threatInput }),
             });
-            threatAnalysisResult = response.ok 
-                ? JSON.stringify(await response.json(), null, 2) 
-                : 'Error: Unable to process threat analysis.';
+
+            if (response.ok) {
+                const jsonData = await response.json();
+                threatAnalysisResult = JSON.stringify(jsonData, null, 2);  // Format the JSON nicely
+            } else {
+                threatAnalysisResult = `Error: ${response.statusText || 'Unable to process threat analysis.'}`;
+            }
         } catch (error) {
             threatAnalysisResult = `Error: ${error.message}`;
         } finally {
@@ -27,6 +38,7 @@
 
 <main>
     <h1>AI-Driven Zero Trust Threat Analysis System</h1>
+    
     <section class="input-section">
         <label for="threatInput">Threat Data (in JSON format):</label>
         <textarea
@@ -34,11 +46,13 @@
             bind:value={threatInput}
             placeholder='{"type": "malware", "severity": "high"}'
             rows="8"
+            disabled={isLoading}
         ></textarea>
-        <button on:click={analyzeThreat} disabled={isLoading}>
+        <button on:click={analyzeThreat} disabled={isLoading || !threatInput.trim()}>
             {isLoading ? 'Analyzing...' : 'Analyze Threat'}
         </button>
     </section>
+
     <section class="result-section">
         <h2>Analysis Result</h2>
         <pre>{threatAnalysisResult || 'Enter threat data and click "Analyze Threat" to see the result.'}</pre>
@@ -77,6 +91,7 @@
         font-size: 1rem;
         border-radius: 4px;
         border: 1px solid #ddd;
+        resize: vertical;
     }
 
     button {
@@ -104,11 +119,13 @@
         padding: 1rem;
         background-color: #f5f5f5;
         border-radius: 4px;
+        border: 1px solid #ddd;
     }
 
     pre {
         font-size: 1rem;
         color: #333;
         white-space: pre-wrap;
+        word-wrap: break-word;
     }
 </style>
