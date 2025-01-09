@@ -9,7 +9,7 @@ pub async fn run_analysis() -> String {
     let device = Device::Cpu;
 
     // Create a variable store for storing model parameters
-    let vs = nn::VarStore::new(device);
+    let mut vs = nn::VarStore::new(device);
 
     // Define the model
     let model = nn::seq()
@@ -29,7 +29,7 @@ pub async fn run_analysis() -> String {
     let output_value = output.double_value(&[0]);
 
     // Return a JSON-formatted string with the result
-    format!("{{\"Behavioral analysis result\": {:.3}}}", output_value)
+    serde_json::json!({ "Behavioral analysis result": output_value }).to_string()
 }
 
 /// Entry point for the program.
