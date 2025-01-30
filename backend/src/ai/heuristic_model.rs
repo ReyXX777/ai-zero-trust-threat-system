@@ -71,4 +71,23 @@ async fn main() {
     // Analyze the threat and print the result
     let result = analyze_threat(example_data).await;
     println!("{}", result);
+
+    // Additional component 1: Log the threat analysis result to a file
+    use std::fs::OpenOptions;
+    use std::io::Write;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("threat_analysis.log")
+        .unwrap();
+    writeln!(file, "{}", result).unwrap();
+
+    // Additional component 2: Add a timestamp to the threat analysis result
+    use chrono::Local;
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+    let result_with_timestamp = json!({
+        "timestamp": timestamp,
+        "analysis_result": result
+    }).to_string();
+    println!("{}", result_with_timestamp);
 }
