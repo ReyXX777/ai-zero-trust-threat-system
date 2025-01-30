@@ -33,5 +33,43 @@ impl Settings {
         // Deserialize into the Settings struct
         cfg.try_into()
     }
+
+    /// Additional component 1: Function to validate the configuration settings
+    pub fn validate(&self) -> Result<(), String> {
+        if self.database_url.is_empty() {
+            return Err("Database URL cannot be empty".to_string());
+        }
+        if self.kafka_brokers.is_empty() {
+            return Err("Kafka brokers cannot be empty".to_string());
+        }
+        if self.api_port == 0 {
+            return Err("API port must be a valid non-zero value".to_string());
+        }
+        Ok(())
+    }
+
+    /// Additional component 2: Function to get a formatted string of the configuration
+    pub fn to_formatted_string(&self) -> String {
+        format!(
+            "Database URL: {}\nKafka Brokers: {}\nAPI Port: {}\nLog Level: {}",
+            self.database_url, self.kafka_brokers, self.api_port, self.log_level
+        )
+    }
 }
 
+/// Example usage of the configuration utilities
+fn main() {
+    match Settings::new() {
+        Ok(settings) => {
+            println!("Configuration loaded successfully:");
+            println!("{}", settings.to_formatted_string());
+
+            if let Err(err) = settings.validate() {
+                println!("Configuration validation failed: {}", err);
+            } else {
+                println!("Configuration is valid.");
+            }
+        }
+        Err(err) => println!("Failed to load configuration: {}", err),
+    }
+}
