@@ -60,3 +60,44 @@ mod tests {
         assert!(parsed_result.get("Behavioral analysis result").is_some());
     }
 }
+
+/// Additional component 1: Logging functionality for threat analysis
+pub async fn log_threat_analysis(data: &str) {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("threat_analysis.log")
+        .unwrap();
+    writeln!(file, "{}", data).unwrap();
+}
+
+/// Additional component 2: Timestamp generation for behavioral analysis
+pub fn generate_timestamp() -> String {
+    use chrono::Local;
+    Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
+}
+
+/// Entry point for the program.
+#[tokio::main]
+async fn main() {
+    // Example threat data in JSON format
+    let example_data = r#"{ "type": "malware", "severity": "high" }"#;
+
+    // Analyze the threat and print the result
+    let threat_result = analyze_threat_score(example_data).await;
+    println!("{}", threat_result);
+
+    // Log the threat analysis result
+    log_threat_analysis(&threat_result).await;
+
+    // Perform behavioral analysis and print the result
+    let behavioral_result = perform_behavioral_analysis().await;
+    println!("{}", behavioral_result);
+
+    // Add a timestamp to the behavioral analysis result
+    let timestamp = generate_timestamp();
+    let result_with_timestamp = format!("{} - {}", timestamp, behavioral_result);
+    println!("{}", result_with_timestamp);
+}
