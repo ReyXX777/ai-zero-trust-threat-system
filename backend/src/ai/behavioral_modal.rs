@@ -38,4 +38,20 @@ async fn main() {
     // Run the analysis and print the result
     let result = run_analysis().await;
     println!("{}", result);
+
+    // Additional component 1: Save the model to a file
+    vs.save("model.pt").unwrap();
+
+    // Additional component 2: Load the model from a file and run inference again
+    let mut vs_load = nn::VarStore::new(Device::Cpu);
+    let model_load = nn::seq()
+        .add(nn::linear(&vs_load.root() / "layer1", 3, 16, Default::default()))
+        .add_fn(|x| x.relu())
+        .add(nn::linear(&vs_load.root() / "layer2", 16, 8, Default::default()))
+        .add_fn(|x| x.relu())
+        .add(nn::linear(&vs_load.root() / "layer3", 8, 1, Default::default()));
+    vs_load.load("model.pt").unwrap();
+    let output_load = model_load.forward(&input);
+    let output_value_load = output_load.double_value(&[0]);
+    println!("Loaded model result: {}", output_value_load);
 }
