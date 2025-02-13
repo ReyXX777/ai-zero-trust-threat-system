@@ -1,4 +1,7 @@
 use serde_json::{json, Value};
+use chrono::Local;
+use std::fs::OpenOptions;
+use std::io::Write;
 
 /// Analyzes the threat data and calculates a threat score.
 /// 
@@ -73,8 +76,6 @@ async fn main() {
     println!("{}", result);
 
     // Additional component 1: Log the threat analysis result to a file
-    use std::fs::OpenOptions;
-    use std::io::Write;
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
@@ -83,11 +84,55 @@ async fn main() {
     writeln!(file, "{}", result).unwrap();
 
     // Additional component 2: Add a timestamp to the threat analysis result
-    use chrono::Local;
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
     let result_with_timestamp = json!({
         "timestamp": timestamp,
         "analysis_result": result
     }).to_string();
     println!("{}", result_with_timestamp);
+
+    // Additional component 3: Validate the input data structure
+    let invalid_data = r#"{ "type": "malware" }"#; // Missing severity
+    let invalid_result = analyze_threat(invalid_data).await;
+    println!("{}", invalid_result);
+
+    // Additional component 4: Add a function to categorize threats
+    let threat_category = categorize_threat(&serde_json::from_str(example_data).unwrap());
+    println!("Threat category: {}", threat_category);
+
+    // Additional component 5: Add a function to generate a report summary
+    let report_summary = generate_report_summary(&result);
+    println!("Report summary: {}", report_summary);
+}
+
+/// Categorizes the threat based on its type.
+/// 
+/// # Arguments
+/// * `data` - A `serde_json::Value` object containing the threat details.
+/// 
+/// # Returns
+/// A string representing the threat category.
+fn categorize_threat(data: &Value) -> String {
+    match data["type"].as_str() {
+        Some("malware") => "Critical",
+        Some("phishing") => "High",
+        Some("adware") => "Medium",
+        Some("ransomware") => "Critical",
+        _ => "Low",
+    }.to_string()
+}
+
+/// Generates a summary of the threat analysis report.
+/// 
+/// # Arguments
+/// * `result` - A JSON-formatted string containing the analysis result.
+/// 
+/// # Returns
+/// A string representing the report summary.
+fn generate_report_summary(result: &str) -> String {
+    let result_value: Value = serde_json::from_str(result).unwrap();
+    format!(
+        "Threat type: {}, Severity: {}, Score: {}",
+        result_value["type"], result_value["severity"], result_value["threat_score"]
+    )
 }
