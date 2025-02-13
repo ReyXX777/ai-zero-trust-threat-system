@@ -55,6 +55,27 @@ impl Settings {
             self.database_url, self.kafka_brokers, self.api_port, self.log_level
         )
     }
+
+    /// Additional component 3: Function to check if the log level is valid
+    pub fn is_log_level_valid(&self) -> bool {
+        matches!(
+            self.log_level.as_str(),
+            "trace" | "debug" | "info" | "warn" | "error"
+        )
+    }
+
+    /// Additional component 4: Function to get the API address as a string
+    pub fn get_api_address(&self) -> String {
+        format!("0.0.0.0:{}", self.api_port)
+    }
+
+    /// Additional component 5: Function to parse Kafka brokers into a Vec<String>
+    pub fn get_kafka_brokers_list(&self) -> Vec<String> {
+        self.kafka_brokers
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .collect()
+    }
 }
 
 /// Example usage of the configuration utilities
@@ -69,6 +90,15 @@ fn main() {
             } else {
                 println!("Configuration is valid.");
             }
+
+            if !settings.is_log_level_valid() {
+                println!("Invalid log level: {}", settings.log_level);
+            } else {
+                println!("Log level is valid.");
+            }
+
+            println!("API Address: {}", settings.get_api_address());
+            println!("Kafka Brokers List: {:?}", settings.get_kafka_brokers_list());
         }
         Err(err) => println!("Failed to load configuration: {}", err),
     }
