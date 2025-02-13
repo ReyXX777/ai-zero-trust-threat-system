@@ -79,11 +79,47 @@ pub fn generate_timestamp() -> String {
     Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
+/// Additional component 3: Validate input data for threat analysis
+pub fn validate_input_data(data: &str) -> Result<(), String> {
+    use serde_json::Value;
+    let parsed_data: Value = serde_json::from_str(data).map_err(|_| "Invalid JSON data".to_string())?;
+    if !parsed_data.get("type").is_some() || !parsed_data.get("severity").is_some() {
+        return Err("Missing required fields: 'type' or 'severity'".to_string());
+    }
+    Ok(())
+}
+
+/// Additional component 4: Categorize threat based on severity
+pub fn categorize_threat(severity: &str) -> String {
+    match severity {
+        "high" => "Critical",
+        "medium" => "High",
+        "low" => "Medium",
+        _ => "Unknown",
+    }.to_string()
+}
+
+/// Additional component 5: Generate a summary report for threat analysis
+pub fn generate_summary_report(threat_score: f64, severity: &str) -> String {
+    format!(
+        "Threat Score: {:.2}, Severity: {}, Category: {}",
+        threat_score,
+        severity,
+        categorize_threat(severity)
+    )
+}
+
 /// Entry point for the program.
 #[tokio::main]
 async fn main() {
     // Example threat data in JSON format
     let example_data = r#"{ "type": "malware", "severity": "high" }"#;
+
+    // Validate input data
+    if let Err(err) = validate_input_data(example_data) {
+        println!("Validation error: {}", err);
+        return;
+    }
 
     // Analyze the threat and print the result
     let threat_result = analyze_threat_score(example_data).await;
@@ -100,4 +136,11 @@ async fn main() {
     let timestamp = generate_timestamp();
     let result_with_timestamp = format!("{} - {}", timestamp, behavioral_result);
     println!("{}", result_with_timestamp);
+
+    // Generate and print a summary report
+    let parsed_result: serde_json::Value = serde_json::from_str(&threat_result).unwrap();
+    let threat_score = parsed_result["threat_score"].as_f64().unwrap();
+    let severity = parsed_result["severity"].as_str().unwrap();
+    let summary_report = generate_summary_report(threat_score, severity);
+    println!("Summary Report: {}", summary_report);
 }
